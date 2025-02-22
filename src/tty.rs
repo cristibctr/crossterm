@@ -3,7 +3,7 @@
 //! This module defines the IsTty trait and the is_tty method to
 //! return true if the item represents a terminal.
 
-#[cfg(unix)]
+#[cfg(any(unix, target_os = "wasi"))]
 use std::os::unix::io::AsRawFd;
 #[cfg(windows)]
 use std::os::windows::io::AsRawHandle;
