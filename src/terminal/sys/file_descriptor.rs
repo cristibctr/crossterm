@@ -1,10 +1,10 @@
 use std::io;
 
-#[cfg(feature = "libc")]
+#[cfg(any(feature = "libc", target_vendor="wasmer"))]
 use libc::size_t;
-#[cfg(not(feature = "libc"))]
+#[cfg(not(any(feature = "libc", target_vendor="wasmer")))]
 use rustix::fd::{AsFd, AsRawFd, BorrowedFd, OwnedFd, RawFd};
-#[cfg(feature = "libc")]
+#[cfg(any(feature = "libc", target_vendor="wasmer"))]
 use std::{
     fs,
     marker::PhantomData,
@@ -19,20 +19,20 @@ use std::{
 /// It allows to retrieve raw file descriptor, write to the file descriptor and
 /// mainly it closes the file descriptor once dropped.
 #[derive(Debug)]
-#[cfg(feature = "libc")]
+#[cfg(any(feature = "libc", target_vendor="wasmer"))]
 pub struct FileDesc<'a> {
     fd: RawFd,
     close_on_drop: bool,
     phantom: PhantomData<&'a ()>,
 }
 
-#[cfg(not(feature = "libc"))]
+#[cfg(not(any(feature = "libc", target_vendor="wasmer")))]
 pub enum FileDesc<'a> {
     Owned(OwnedFd),
     Borrowed(BorrowedFd<'a>),
 }
 
-#[cfg(feature = "libc")]
+#[cfg(any(feature = "libc", target_vendor="wasmer"))]
 impl FileDesc<'_> {
     /// Constructs a new `FileDesc` with the given `RawFd`.
     ///
@@ -70,7 +70,7 @@ impl FileDesc<'_> {
     }
 }
 
-#[cfg(not(feature = "libc"))]
+#[cfg(not(any(feature = "libc", target_vendor="wasmer")))]
 impl FileDesc<'_> {
     pub fn read(&self, buffer: &mut [u8]) -> io::Result<usize> {
         let fd = match self {
@@ -89,7 +89,7 @@ impl FileDesc<'_> {
     }
 }
 
-#[cfg(feature = "libc")]
+#[cfg(any(feature = "libc", target_vendor="wasmer"))]
 impl Drop for FileDesc<'_> {
     fn drop(&mut self) {
         if self.close_on_drop {
@@ -109,7 +109,7 @@ impl AsRawFd for FileDesc<'_> {
     }
 }
 
-#[cfg(not(feature = "libc"))]
+#[cfg(not(any(feature = "libc", target_vendor="wasmer")))]
 impl AsFd for FileDesc<'_> {
     fn as_fd(&self) -> BorrowedFd<'_> {
         match self {
@@ -119,7 +119,7 @@ impl AsFd for FileDesc<'_> {
     }
 }
 
-#[cfg(feature = "libc")]
+#[cfg(any(feature = "libc", target_vendor="wasmer"))]
 /// Creates a file descriptor pointing to the standard input or `/dev/tty`.
 pub fn tty_fd() -> io::Result<FileDesc<'static>> {
     let (fd, close_on_drop) = if unsafe { libc::isatty(libc::STDIN_FILENO) == 1 } {
@@ -138,7 +138,7 @@ pub fn tty_fd() -> io::Result<FileDesc<'static>> {
     Ok(FileDesc::new(fd, close_on_drop))
 }
 
-#[cfg(not(feature = "libc"))]
+#[cfg(not(any(feature = "libc", target_vendor="wasmer")))]
 /// Creates a file descriptor pointing to the standard input or `/dev/tty`.
 pub fn tty_fd() -> io::Result<FileDesc<'static>> {
     use std::fs::File;
