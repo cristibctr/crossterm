@@ -1,6 +1,10 @@
 use std::{collections::VecDeque, io, time::Duration};
 
-use mio::{unix::SourceFd, Events, Interest, Poll, Token};
+use mio::{Events, Interest, Poll, Token};
+#[cfg(target_vendor = "wasmer")]
+use mio::wasi::SourceFd;
+#[cfg(unix)]
+use mio::unix::SourceFd;
 use signal_hook_mio::v1_0::Signals;
 
 #[cfg(feature = "event-stream")]
