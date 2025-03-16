@@ -3,8 +3,10 @@
 //! This module defines the IsTty trait and the is_tty method to
 //! return true if the item represents a terminal.
 
-#[cfg(any(unix, target_os = "wasi"))]
+#[cfg(unix)]
 use std::os::unix::io::AsRawFd;
+#[cfg(target_vendor = "wasmer")]
+use std::os::wasi::io::AsRawFd;
 #[cfg(windows)]
 use std::os::windows::io::AsRawHandle;
 
@@ -26,7 +28,7 @@ pub trait IsTty {
 
 /// On UNIX, the `isatty()` function returns true if a file
 /// descriptor is a terminal.
-#[cfg(all(unix, feature = "libc"))]
+#[cfg(all(any(unix, target_vendor = "wasmer"), feature = "libc"))]
 impl<S: AsRawFd> IsTty for S {
     fn is_tty(&self) -> bool {
         let fd = self.as_raw_fd();
@@ -34,7 +36,7 @@ impl<S: AsRawFd> IsTty for S {
     }
 }
 
-#[cfg(all(unix, not(feature = "libc")))]
+#[cfg(all(any(unix, target_vendor = "wasmer"), not(feature = "libc")))]
 impl<S: AsRawFd> IsTty for S {
     fn is_tty(&self) -> bool {
         let fd = self.as_raw_fd();

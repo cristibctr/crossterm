@@ -1,9 +1,9 @@
 //! This module provides platform related functions.
 
-#[cfg(any(unix, target_os = "wasi"))]
+#[cfg(any(unix, target_vendor = "wasmer"))]
 #[cfg(feature = "events")]
 pub use self::unix::supports_keyboard_enhancement;
-#[cfg(any(unix, target_os = "wasi"))]
+#[cfg(any(unix, target_vendor = "wasmer"))]
 pub(crate) use self::unix::{
     disable_raw_mode, enable_raw_mode, is_raw_mode_enabled, size, window_size,
 };
@@ -21,7 +21,7 @@ pub(crate) use self::windows::{
 #[cfg(windows)]
 mod windows;
 
-#[cfg(any(unix, target_os = "wasi"))]
+#[cfg(any(unix, target_vendor = "wasmer"))]
 pub mod file_descriptor;
-#[cfg(any(unix, target_os = "wasi"))]
+#[cfg(any(unix, target_vendor = "wasmer"))]
 mod unix;

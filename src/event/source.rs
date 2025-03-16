@@ -4,7 +4,7 @@ use std::{io, time::Duration};
 use super::sys::Waker;
 use super::InternalEvent;
 
-#[cfg(any(unix, target_os = "wasi"))]
+#[cfg(any(unix, target_vendor = "wasmer"))]
 pub(crate) mod unix;
 #[cfg(windows)]
 pub(crate) mod windows;

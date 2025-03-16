@@ -61,13 +61,13 @@ crossterm_winapi = { version = "0.9.1", optional = true }
 winapi = { version = "0.3.9", optional = true, features = ["winuser", "winerror"] }
 
 # UNIX dependencies
-[target.'cfg(any(unix, all(target_os = "wasi", not(any(target_env = "p2", target_env = "p1")))))'.dependencies]
+[target.'cfg(any(unix, all(target_vendor = "wasmer", not(any(target_env = "p2", target_env = "p1")))))'.dependencies]
 filedescriptor = { version = "0.8", optional = true }
 # Default to using rustix for UNIX systems, but provide an option to use libc for backwards
 # compatibility.
-libc = { git = "https://github.com/cristibctr/libc-0.2.169", branch = "wasix-0.2.169" }
-mio = { version = "1.0", features = ["os-poll"], optional = true }
-rustix = { version = "0.38.36", default-features = false, features = ["std", "stdio", "termios"] }
+libc = { git = "https://github.com/cristibctr/libc-0.2.169", branch = "wasix-0.2.169" , version = "0.2.169" }
+mio = { version = "1.0.1", features = ["os-poll"], optional = true }
+rustix = { version = "0.38.44", default-features = false, features = ["std", "stdio", "termios"] }
 signal-hook = { version = "0.3.17", optional = true }
 signal-hook-mio = { version = "0.2.4", features = ["support-v1_0"], optional = true }
 
@@ -78,7 +78,7 @@ futures-timer = "3.0"
 serde_json = "1.0"
 serial_test = "2.0.0"
 temp-env = "0.3.6"
-tokio = { version = "1.25", features = ["full"] }
+tokio = { version = "=1.41.1", features = ["full"] }
 
 # Examples
 [[example]]
@@ -115,3 +115,6 @@ required-features = ["events"]
 
 [patch.crates-io]
 rustix = { git = "https://github.com/cristibctr/rustix", branch = "feat/add-wasm-support" }
+libc = { git = "https://github.com/cristibctr/libc-0.2.169", branch = "wasix-0.2.169" }
+mio = { git = "https://github.com/cristibctr/mio", branch = "v1.0.1" }
+tokio = { git = "https://github.com/cristibctr/tokio-wasix", branch = "wasix-1.41.1" }

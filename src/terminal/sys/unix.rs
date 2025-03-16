@@ -6,20 +6,20 @@ use crate::terminal::{
     sys::file_descriptor::{tty_fd, FileDesc},
     WindowSize,
 };
-#[cfg(any(feature = "libc", target_vendor="wasmer"))]
+#[cfg(feature = "libc")]
 use libc::{
     cfmakeraw, ioctl, tcgetattr, tcsetattr, termios as Termios, winsize, STDOUT_FILENO, TCSANOW,
     TIOCGWINSZ,
 };
 use parking_lot::Mutex;
-#[cfg(not(any(feature = "libc", target_vendor="wasmer")))]
+#[cfg(not(feature = "libc"))]
 use rustix::{
     fd::AsFd,
     termios::{Termios, Winsize},
 };
 
 use std::{fs::File, io, process};
-#[cfg(any(feature = "libc", target_vendor="wasmer"))]
+#[cfg(feature = "libc")]
 use std::{
     mem,
     os::unix::io::{IntoRawFd, RawFd},
@@ -33,7 +33,7 @@ pub(crate) fn is_raw_mode_enabled() -> bool {
     TERMINAL_MODE_PRIOR_RAW_MODE.lock().is_some()
 }
 
-#[cfg(any(feature = "libc", target_vendor="wasmer"))]
+#[cfg(feature = "libc")]
 impl From<winsize> for WindowSize {
     fn from(size: winsize) -> WindowSize {
         WindowSize {
@@ -44,7 +44,7 @@ impl From<winsize> for WindowSize {
         }
     }
 }
-#[cfg(not(any(feature = "libc", target_vendor="wasmer")))]
+#[cfg(not(feature = "libc"))]
 impl From<Winsize> for WindowSize {
     fn from(size: Winsize) -> WindowSize {
         WindowSize {
@@ -57,7 +57,7 @@ impl From<Winsize> for WindowSize {
 }
 
 #[allow(clippy::useless_conversion)]
-#[cfg(any(feature = "libc", target_vendor="wasmer"))]
+#[cfg(feature = "libc")]
 pub(crate) fn window_size() -> io::Result<WindowSize> {
     // http://rosettacode.org/wiki/Terminal_control/Dimensions#Library:_BSD_libc
     let mut size = winsize {
@@ -82,7 +82,7 @@ pub(crate) fn window_size() -> io::Result<WindowSize> {
     Err(std::io::Error::last_os_error().into())
 }
 
-#[cfg(not(any(feature = "libc", target_vendor="wasmer")))]
+#[cfg(not(feature = "libc"))]
 pub(crate) fn window_size() -> io::Result<WindowSize> {
     let file = File::open("/dev/tty").map(|file| (FileDesc::Owned(file.into())));
     let fd = if let Ok(file) = &file {
@@ -104,7 +104,7 @@ pub(crate) fn size() -> io::Result<(u16, u16)> {
     tput_size().ok_or_else(|| std::io::Error::last_os_error().into())
 }
 
-#[cfg(any(feature = "libc", target_vendor="wasmer"))]
+#[cfg(feature = "libc")]
 pub(crate) fn enable_raw_mode() -> io::Result<()> {
     let mut original_mode = TERMINAL_MODE_PRIOR_RAW_MODE.lock();
     if original_mode.is_some() {
@@ -122,7 +122,7 @@ pub(crate) fn enable_raw_mode() -> io::Result<()> {
     Ok(())
 }
 
-#[cfg(not(any(feature = "libc", target_vendor="wasmer")))]
+#[cfg(not(feature = "libc"))]
 pub(crate) fn enable_raw_mode() -> io::Result<()> {
     let mut original_mode = TERMINAL_MODE_PRIOR_RAW_MODE.lock();
     if original_mode.is_some() {
@@ -144,7 +144,7 @@ pub(crate) fn enable_raw_mode() -> io::Result<()> {
 /// More precisely, reset the whole termios mode to what it was before the first call
 /// to [enable_raw_mode]. If you don't mess with termios outside of crossterm, it's
 /// effectively disabling the raw mode and doing nothing else.
-#[cfg(any(feature = "libc", target_vendor="wasmer"))]
+#[cfg(feature = "libc")]
 pub(crate) fn disable_raw_mode() -> io::Result<()> {
     let mut original_mode = TERMINAL_MODE_PRIOR_RAW_MODE.lock();
     if let Some(original_mode_ios) = original_mode.as_ref() {
@@ -156,7 +156,7 @@ pub(crate) fn disable_raw_mode() -> io::Result<()> {
     Ok(())
 }
 
-#[cfg(not(any(feature = "libc", target_vendor="wasmer")))]
+#[cfg(not(feature = "libc"))]
 pub(crate) fn disable_raw_mode() -> io::Result<()> {
     let mut original_mode = TERMINAL_MODE_PRIOR_RAW_MODE.lock();
     if let Some(original_mode_ios) = original_mode.as_ref() {
@@ -168,13 +168,13 @@ pub(crate) fn disable_raw_mode() -> io::Result<()> {
     Ok(())
 }
 
-#[cfg(not(any(feature = "libc", target_vendor="wasmer")))]
+#[cfg(not(feature = "libc"))]
 fn get_terminal_attr(fd: impl AsFd) -> io::Result<Termios> {
     let result = rustix::termios::tcgetattr(fd)?;
     Ok(result)
 }
 
-#[cfg(not(any(feature = "libc", target_vendor="wasmer")))]
+#[cfg(not(feature = "libc"))]
 fn set_terminal_attr(fd: impl AsFd, termios: &Termios) -> io::Result<()> {
     rustix::termios::tcsetattr(fd, rustix::termios::OptionalActions::Now, termios)?;
     Ok(())
@@ -296,13 +296,13 @@ fn tput_size() -> Option<(u16, u16)> {
     }
 }
 
-#[cfg(any(feature = "libc", target_vendor="wasmer"))]
+#[cfg(feature = "libc")]
 // Transform the given mode into an raw mode (non-canonical) mode.
 fn raw_terminal_attr(termios: &mut Termios) {
     unsafe { cfmakeraw(termios) }
 }
 
-#[cfg(any(feature = "libc", target_vendor="wasmer"))]
+#[cfg(feature = "libc")]
 fn get_terminal_attr(fd: RawFd) -> io::Result<Termios> {
     unsafe {
         let mut termios = mem::zeroed();
@@ -311,12 +311,12 @@ fn get_terminal_attr(fd: RawFd) -> io::Result<Termios> {
     }
 }
 
-#[cfg(any(feature = "libc", target_vendor="wasmer"))]
+#[cfg(feature = "libc")]
 fn set_terminal_attr(fd: RawFd, termios: &Termios) -> io::Result<()> {
     wrap_with_result(unsafe { tcsetattr(fd, TCSANOW, termios) })
 }
 
-#[cfg(any(feature = "libc", target_vendor="wasmer"))]
+#[cfg(feature = "libc")]
 fn wrap_with_result(result: i32) -> io::Result<()> {
     if result == -1 {
         Err(io::Error::last_os_error())

@@ -6,22 +6,22 @@ pub(crate) trait Filter: Send + Sync + 'static {
     fn eval(&self, event: &InternalEvent) -> bool;
 }
 
-#[cfg(any(unix, target_os = "wasi"))]
+#[cfg(any(unix, target_vendor = "wasmer"))]
 #[derive(Debug, Clone)]
 pub(crate) struct CursorPositionFilter;
 
-#[cfg(any(unix, target_os = "wasi"))]
+#[cfg(any(unix, target_vendor = "wasmer"))]
 impl Filter for CursorPositionFilter {
     fn eval(&self, event: &InternalEvent) -> bool {
         matches!(*event, InternalEvent::CursorPosition(_, _))
     }
 }
 
-#[cfg(any(unix, target_os = "wasi"))]
+#[cfg(any(unix, target_vendor = "wasmer"))]
 #[derive(Debug, Clone)]
 pub(crate) struct KeyboardEnhancementFlagsFilter;
 
-#[cfg(any(unix, target_os = "wasi"))]
+#[cfg(any(unix, target_vendor = "wasmer"))]
 impl Filter for KeyboardEnhancementFlagsFilter {
     fn eval(&self, event: &InternalEvent) -> bool {
         // This filter checks for either a KeyboardEnhancementFlags response or
@@ -35,11 +35,11 @@ impl Filter for KeyboardEnhancementFlagsFilter {
     }
 }
 
-#[cfg(any(unix, target_os = "wasi"))]
+#[cfg(any(unix, target_vendor = "wasmer"))]
 #[derive(Debug, Clone)]
 pub(crate) struct PrimaryDeviceAttributesFilter;
 
-#[cfg(any(unix, target_os = "wasi"))]
+#[cfg(any(unix, target_vendor = "wasmer"))]
 impl Filter for PrimaryDeviceAttributesFilter {
     fn eval(&self, event: &InternalEvent) -> bool {
         matches!(*event, InternalEvent::PrimaryDeviceAttributes)
@@ -50,7 +50,7 @@ impl Filter for PrimaryDeviceAttributesFilter {
 pub(crate) struct EventFilter;
 
 impl Filter for EventFilter {
-    #[cfg(any(unix, target_os = "wasi"))]
+    #[cfg(any(unix, target_vendor = "wasmer"))]
     fn eval(&self, event: &InternalEvent) -> bool {
         matches!(*event, InternalEvent::Event(_))
     }
@@ -62,7 +62,7 @@ impl Filter for EventFilter {
 }
 
 #[cfg(test)]
-#[cfg(any(unix, target_os = "wasi"))]
+#[cfg(any(unix, target_vendor = "wasmer"))]
 mod tests {
     use super::{
         super::Event, CursorPositionFilter, EventFilter, Filter, InternalEvent,

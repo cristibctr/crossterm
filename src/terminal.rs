@@ -105,7 +105,7 @@ pub use sys::supports_keyboard_enhancement;
 ///
 /// Please have a look at the [raw mode](./index.html#raw-mode) section.
 pub fn is_raw_mode_enabled() -> io::Result<bool> {
-    #[cfg(any(unix, target_os = "wasi"))]
+    #[cfg(any(unix, target_vendor = "wasmer"))]
     {
         Ok(sys::is_raw_mode_enabled())
     }

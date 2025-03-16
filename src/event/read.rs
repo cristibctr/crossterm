@@ -1,6 +1,6 @@
 use std::{collections::vec_deque::VecDeque, io, time::Duration};
 
-#[cfg(any(unix, target_os = "wasi"))]
+#[cfg(any(unix, target_vendor = "wasmer"))]
 use crate::event::source::unix::UnixInternalEventSource;
 #[cfg(windows)]
 use crate::event::source::windows::WindowsEventSource;
@@ -19,7 +19,7 @@ impl Default for InternalEventReader {
     fn default() -> Self {
         #[cfg(windows)]
         let source = WindowsEventSource::new();
-        #[cfg(any(unix, target_os = "wasi"))]
+        #[cfg(any(unix, target_vendor = "wasmer"))]
         let source = UnixInternalEventSource::new();
 
         let source = source.ok().map(|x| Box::new(x) as Box<dyn EventSource>);
@@ -130,7 +130,7 @@ mod tests {
     use std::io;
     use std::{collections::VecDeque, time::Duration};
 
-    #[cfg(any(unix, target_os = "wasi"))]
+    #[cfg(any(unix, target_vendor = "wasmer"))]
     use super::super::filter::CursorPositionFilter;
     use super::{super::Event, EventSource, Filter, InternalEvent, InternalEventReader};
 
@@ -172,7 +172,7 @@ mod tests {
     }
 
     #[test]
-    #[cfg(any(unix, target_os = "wasi"))]
+    #[cfg(any(unix, target_vendor = "wasmer"))]
     fn test_poll_returns_true_for_matching_event_in_queue_at_back() {
         let mut reader = InternalEventReader {
             events: vec![
@@ -201,7 +201,7 @@ mod tests {
     }
 
     #[test]
-    #[cfg(any(unix, target_os = "wasi"))]
+    #[cfg(any(unix, target_vendor = "wasmer"))]
     fn test_read_returns_matching_event_in_queue_at_back() {
         const CURSOR_EVENT: InternalEvent = InternalEvent::CursorPosition(10, 20);
 
@@ -215,7 +215,7 @@ mod tests {
     }
 
     #[test]
-    #[cfg(any(unix, target_os = "wasi"))]
+    #[cfg(any(unix, target_vendor = "wasmer"))]
     fn test_read_does_not_consume_skipped_event() {
         const SKIPPED_EVENT: InternalEvent = InternalEvent::Event(Event::Resize(10, 10));
         const CURSOR_EVENT: InternalEvent = InternalEvent::CursorPosition(10, 20);

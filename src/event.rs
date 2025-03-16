@@ -249,7 +249,7 @@ pub fn poll(timeout: Duration) -> std::io::Result<bool> {
 pub fn read() -> std::io::Result<Event> {
     match read_internal(&EventFilter)? {
         InternalEvent::Event(event) => Ok(event),
-        #[cfg(any(unix, target_os = "wasi"))]
+        #[cfg(any(unix, target_vendor = "wasmer"))]
         _ => unreachable!(),
     }
 }
@@ -874,7 +874,7 @@ impl Display for KeyModifiers {
             }
             match modifier {
                 KeyModifiers::SHIFT => f.write_str("Shift")?,
-                #[cfg(any(unix, target_os = "wasi"))]
+                #[cfg(any(unix, target_vendor = "wasmer"))]
                 KeyModifiers::CONTROL => f.write_str("Control")?,
                 #[cfg(windows)]
                 KeyModifiers::CONTROL => f.write_str("Ctrl")?,
@@ -1475,13 +1475,13 @@ pub(crate) enum InternalEvent {
     /// An event.
     Event(Event),
     /// A cursor position (`col`, `row`).
-    #[cfg(any(unix, target_os = "wasi"))]
+    #[cfg(any(unix, target_vendor = "wasmer"))]
     CursorPosition(u16, u16),
     /// The progressive keyboard enhancement flags enabled by the terminal.
-    #[cfg(any(unix, target_os = "wasi"))]
+    #[cfg(any(unix, target_vendor = "wasmer"))]
     KeyboardEnhancementFlags(KeyboardEnhancementFlags),
     /// Attributes and architectural class of the terminal.
-    #[cfg(any(unix, target_os = "wasi"))]
+    #[cfg(any(unix, target_vendor = "wasmer"))]
     PrimaryDeviceAttributes,
 }
 
